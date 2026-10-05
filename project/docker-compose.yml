@@ -1,0 +1,47 @@
+# Optional container setup. Local development does NOT need Docker:
+#   python -m uvicorn backend.main:app --port 8000   +   cd frontend && npm run dev
+#
+# Profiles:
+#   default        -> api (+ built frontend) only; uses whatever .env points at
+#                     (MongoDB Atlas / Neo4j Aura, or the in-process fallbacks)
+#   --profile local-db -> also starts a local MongoDB and Neo4j Community
+#
+#   docker compose up --build                       # API + UI on http://localhost:8000
+#   docker compose --profile local-db up --build    # plus local Mongo (27017) and Neo4j (7474/7687)
+services:
+  api:
+    build: .
+    env_file: .env
+    environment:
+      # Only applied when the local-db profile is used; harmless otherwise because
+      # the values in .env take precedence when set there.
+      MONGODB_URI: ${MONGODB_URI:-}
+      NEO4J_URI: ${NEO4J_URI:-}
+    ports: ["8000:8000"]
+    volumes:
+      - ./data:/app/data            # DATASET placeholder lives here (data/raw)
+      - ./ml/artifacts:/app/ml/artifacts
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  mongo:
+    image: mongo:7
+    profiles: ["local-db"]
+    ports: ["27017:27017"]
+    volumes: ["mongo-data:/data/db"]
+
+  neo4j:
+    image: neo4j:5-community
+    profiles: ["local-db"]
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-changeme-please}
+      NEO4J_PLUGINS: '["apoc"]'
+    ports: ["7474:7474", "7687:7687"]
+    volumes: ["neo4j-data:/data"]
+
+volumes:
+  mongo-data:
+  neo4j-data:

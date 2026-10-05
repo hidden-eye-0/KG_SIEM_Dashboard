@@ -1,0 +1,12 @@
+.env
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+ml/artifacts/
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+frontend/dist/
+*.log

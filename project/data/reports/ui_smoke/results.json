@@ -1,0 +1,98 @@
+{
+ "/": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 2278,
+  "has_error_box": false
+ },
+ "/alerts": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 2975,
+  "has_error_box": false
+ },
+ "/investigations": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 1943,
+  "has_error_box": false
+ },
+ "/graph": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 1858,
+  "has_error_box": false
+ },
+ "/story": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 10321,
+  "has_error_box": false
+ },
+ "/threat-intel": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 3387,
+  "has_error_box": false
+ },
+ "/events": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 7697,
+  "has_error_box": false
+ },
+ "/models": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 6050,
+  "has_error_box": false
+ },
+ "/evaluation": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 3529,
+  "has_error_box": false
+ },
+ "/settings": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 1941,
+  "has_error_box": false
+ },
+ "/alerts/alr_01M1R5JGVWHDF6A6QSNHMX2K6T": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 2258,
+  "has_error_box": false
+ },
+ "/investigations/inv_01M1R5KWESDYNYQKX7YSYRZ9MT": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 3715,
+  "has_error_box": false
+ },
+ "/investigations/inv_01M1R5KWESDYNYQKX7YSYRZ9MT?tab=evidence": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 1793,
+  "has_error_box": false
+ },
+ "/investigations/inv_01M1R5KWESDYNYQKX7YSYRZ9MT?tab=chain": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 2921,
+  "has_error_box": false
+ },
+ "/graph/inv_01M1R5KWESDYNYQKX7YSYRZ9MT": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 1858,
+  "has_error_box": false
+ },
+ "/story/inv_01M1R5KWESDYNYQKX7YSYRZ9MT": {
+  "console_errors": [],
+  "failed_requests": [],
+  "chars": 10321,
+  "has_error_box": false
+ }
+}

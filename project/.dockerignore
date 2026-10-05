@@ -1,0 +1,10 @@
+.env
+node_modules
+frontend/dist
+frontend/node_modules
+data/raw/*
+data/processed/*
+ml/artifacts/*
+__pycache__
+.pytest_cache
+*.pyc

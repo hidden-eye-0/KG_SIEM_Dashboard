@@ -1,0 +1,116 @@
+# Scenario templates for the Scenario Contextualiser (decision D2).
+#
+# Each stage draws K real flows of the stage's label (from CICIoT2023 when available,
+# otherwise from the synthetic demo flows) and attaches synthesized entity/time context:
+#   attacker IPs  : RFC 5737 documentation ranges (203.0.113.0/24, 198.51.100.0/24)
+#   IoT devices   : 192.168.0.0/16 addresses with device ids/types
+#   timestamps    : sequential within the stage, gap_seconds between stages
+# Every event produced from a template carries context.provenance = "synthesized" and a
+# ground_truth sub-document (scenario_id/stage_id) that investigation tools never return.
+# Multi-stage scenarios exist so attack-chain reconstruction can be evaluated objectively.
+
+devices:
+  - {device_id: iot-cam-01, device_type: ip_camera, ip: 192.168.10.11}
+  - {device_id: iot-cam-02, device_type: ip_camera, ip: 192.168.10.12}
+  - {device_id: iot-plug-03, device_type: smart_plug, ip: 192.168.10.23}
+  - {device_id: iot-hub-04, device_type: smart_hub, ip: 192.168.10.34}
+  - {device_id: iot-speaker-05, device_type: smart_speaker, ip: 192.168.10.45}
+  - {device_id: iot-lock-06, device_type: smart_lock, ip: 192.168.10.56}
+  - {device_id: iot-thermo-07, device_type: thermostat, ip: 192.168.10.67}
+  - {device_id: iot-gateway-08, device_type: gateway, ip: 192.168.10.1}
+  - {device_id: iot-nas-09, device_type: nas, ip: 192.168.20.9}
+  - {device_id: iot-printer-10, device_type: printer, ip: 192.168.20.10}
+
+attackers:
+  - 203.0.113.24
+  - 203.0.113.57
+  - 203.0.113.101
+  - 198.51.100.12
+  - 198.51.100.77
+  - 198.51.100.140
+
+# Optional public indicators (real, well-known, defensive-research friendly) used ONLY when
+# the analyst enables live TI demonstration.  They never appear in events unless
+# `include_public_indicators` is true in the seeding config.
+public_indicators: []
+
+scenarios:
+  - name: recon_bruteforce_cmdinjection
+    description: "Port scan, then dictionary brute force against auth protocols, then command injection over HTTP from the same source against the same device"
+    stages:
+      - {label: Recon-PortScan, flows: 120, targets: 1, gap_seconds: 0, spread_seconds: 90}
+      - {label: DictionaryBruteForce, flows: 80, targets: 1, gap_seconds: 240, spread_seconds: 300}
+      - {label: CommandInjection, flows: 25, targets: 1, gap_seconds: 180, spread_seconds: 120}
+  - name: host_discovery_osscan_vulnscan
+    description: "Host discovery sweep across the segment, OS scan of discovered devices, then vulnerability scan of one web-facing device"
+    stages:
+      - {label: Recon-HostDiscovery, flows: 90, targets: 6, gap_seconds: 0, spread_seconds: 120}
+      - {label: Recon-OSScan, flows: 70, targets: 3, gap_seconds: 120, spread_seconds: 180}
+      - {label: VulnerabilityScan, flows: 60, targets: 1, gap_seconds: 300, spread_seconds: 240}
+  - name: pingsweep_portscan_sqli_upload
+    description: "Ping sweep, port scan, SQL injection and finally an upload attack against the same web device"
+    stages:
+      - {label: Recon-PingSweep, flows: 60, targets: 5, gap_seconds: 0, spread_seconds: 60}
+      - {label: Recon-PortScan, flows: 100, targets: 1, gap_seconds: 90, spread_seconds: 120}
+      - {label: SqlInjection, flows: 30, targets: 1, gap_seconds: 400, spread_seconds: 200}
+      - {label: Uploading_Attack, flows: 15, targets: 1, gap_seconds: 200, spread_seconds: 90}
+  - name: arp_then_dns_spoofing
+    description: "ARP spoofing on the segment followed by DNS spoofing against the same devices"
+    stages:
+      - {label: MITM-ArpSpoofing, flows: 80, targets: 3, gap_seconds: 0, spread_seconds: 200}
+      - {label: DNS_Spoofing, flows: 60, targets: 3, gap_seconds: 60, spread_seconds: 300}
+  - name: xss_then_backdoor
+    description: "XSS attempts against a device web UI followed by backdoor-malware-labelled traffic from the same source"
+    stages:
+      - {label: XSS, flows: 30, targets: 1, gap_seconds: 0, spread_seconds: 150}
+      - {label: Backdoor_Malware, flows: 40, targets: 1, gap_seconds: 600, spread_seconds: 900}
+  - name: ddos_syn_flood
+    description: "Distributed SYN flood against one device from several sources"
+    sources: 4
+    stages:
+      - {label: DDoS-SYN_Flood, flows: 400, targets: 1, gap_seconds: 0, spread_seconds: 120}
+  - name: ddos_udp_flood
+    description: "Distributed UDP flood against one device"
+    sources: 3
+    stages:
+      - {label: DDoS-UDP_Flood, flows: 300, targets: 1, gap_seconds: 0, spread_seconds: 90}
+  - name: ddos_icmp_flood
+    description: "Distributed ICMP flood against the gateway"
+    sources: 3
+    stages:
+      - {label: DDoS-ICMP_Flood, flows: 300, targets: 1, gap_seconds: 0, spread_seconds: 90}
+  - name: ddos_http_flood
+    description: "Distributed HTTP flood against a web-facing device"
+    sources: 3
+    stages:
+      - {label: DDoS-HTTP_Flood, flows: 240, targets: 1, gap_seconds: 0, spread_seconds: 150}
+  - name: ddos_tcp_flood
+    description: "Distributed TCP flood"
+    sources: 3
+    stages:
+      - {label: DDoS-TCP_Flood, flows: 300, targets: 1, gap_seconds: 0, spread_seconds: 100}
+  - name: dos_tcp_flood
+    description: "Single-source TCP flood"
+    stages:
+      - {label: DoS-TCP_Flood, flows: 220, targets: 1, gap_seconds: 0, spread_seconds: 120}
+  - name: dos_syn_flood_after_portscan
+    description: "Port scan followed by a single-source SYN flood against the same device"
+    stages:
+      - {label: Recon-PortScan, flows: 60, targets: 1, gap_seconds: 0, spread_seconds: 60}
+      - {label: DoS-SYN_Flood, flows: 220, targets: 1, gap_seconds: 120, spread_seconds: 120}
+  - name: dos_udp_flood
+    description: "Single-source UDP flood"
+    stages:
+      - {label: DoS-UDP_Flood, flows: 220, targets: 1, gap_seconds: 0, spread_seconds: 120}
+  - name: dos_http_flood
+    description: "Single-source HTTP flood"
+    stages:
+      - {label: DoS-HTTP_Flood, flows: 180, targets: 1, gap_seconds: 0, spread_seconds: 150}
+  - name: bruteforce_only
+    description: "Dictionary brute force without observed follow-on activity (single-stage control)"
+    stages:
+      - {label: DictionaryBruteForce, flows: 90, targets: 1, gap_seconds: 0, spread_seconds: 400}
+
+background:
+  benign_flows: 1200
+  spread_seconds: 7200

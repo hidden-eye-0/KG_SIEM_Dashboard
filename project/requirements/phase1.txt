@@ -1,0 +1,7 @@
+# Phase 1 — dataset inspection (pure data tooling; no DB / LLM dependencies yet)
+pandas>=2.2,<3.0
+numpy>=2.0
+python-dotenv>=1.0
+pyyaml>=6.0
+tqdm>=4.66
+pytest>=8.0
