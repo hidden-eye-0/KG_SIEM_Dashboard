@@ -29,7 +29,7 @@ os.environ.setdefault("INVESTIGATION_POLICY", "heuristic")
 os.environ.setdefault("GEMINI_API_KEY", "")
 os.environ.setdefault("MONGODB_URI", "")
 os.environ.setdefault("NEO4J_URI", "")
-os.environ.setdefault("DATASET_DIR", str(Path(__file__).resolve().parents[2] / "data" / "raw"))
+os.environ["DATASET_DIR"] = str(Path(__file__).resolve().parents[2] / "tests" / ".pytest-no-dataset")
 
 from backend.config import get_settings  # noqa: E402
 from backend.deps import build_container  # noqa: E402
