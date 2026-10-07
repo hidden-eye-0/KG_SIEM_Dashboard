@@ -1,13 +1,13 @@
 {
   "meta": {
-    "generated_at": "2026-10-07T01:02:28.469442+00:00",
+    "generated_at": "2026-10-07T07:26:55.107285+00:00",
     "data_dir": "/Users/nitish/Code/KG_SIEM/project/data/raw",
     "chunksize": 100000,
     "duplicate_detection": true,
     "pandas_version": "2.3.3",
     "numpy_version": "2.5.3",
     "python_version": "3.14.6",
-    "elapsed_seconds": 1.82,
+    "elapsed_seconds": 1.86,
     "note": "All values are measured from the files listed below. Nothing is assumed from external descriptions of CICIoT2023."
   },
   "files": {
@@ -173,7 +173,7 @@
           "Recon-PingSweep": 6
         },
         "chunks": 3,
-        "seconds": 1.8,
+        "seconds": 1.84,
         "error": null
       }
     ]

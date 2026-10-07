@@ -1,6 +1,6 @@
 # CICIoT2023 — Dataset Inspection Report (Phase 1)
 
-Generated: 2026-10-07T01:02:28.469442+00:00  ·  data dir: `/Users/nitish/Code/KG_SIEM/project/data/raw`  ·  elapsed: 1.82 s
+Generated: 2026-10-07T07:26:55.107285+00:00  ·  data dir: `/Users/nitish/Code/KG_SIEM/project/data/raw`  ·  elapsed: 1.86 s
 
 > Every number below was measured from the listed files in streaming mode (chunksize 100,000). No external dataset descriptions were used.
 
@@ -10,7 +10,7 @@ Generated: 2026-10-07T01:02:28.469442+00:00  ·  data dir: `/Users/nitish/Code/K
 
 | File | Size | Physical data lines | Parsed rows | Malformed skipped | Labels in file | Header OK | Time (s) |
 |---|---:|---:|---:|---:|---:|:-:|---:|
-| `part-00000-363d1ba3-8ab5-4f96-bc25-4d5862db7cb9-c000.csv` | 67.1 MB | 238,687 | 238,687 | 0 | 34 | yes | 1.8 |
+| `part-00000-363d1ba3-8ab5-4f96-bc25-4d5862db7cb9-c000.csv` | 67.1 MB | 238,687 | 238,687 | 0 | 34 | yes | 1.84 |
 
 ## 2. Rows
 
