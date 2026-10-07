@@ -76,8 +76,11 @@ class DocumentStore:
             try:
                 self._client.admin.command("ping")
                 log.info("Connected to MongoDB (%s)", self.settings.mongodb_db)
-            except Exception as exc:  # fall back rather than crash the demo
-                log.error("MongoDB unreachable (%s); falling back to in-process store", exc)
+            except Exception as exc:
+                log.error("MongoDB unreachable (%s)", exc)
+                if not self.settings.allow_service_fallback:
+                    raise RuntimeError("MongoDB is configured but unreachable and ALLOW_SERVICE_FALLBACK=false") from exc
+                log.warning("Falling back to in-process mongomock because ALLOW_SERVICE_FALLBACK=true")
                 self.backend = "mongomock"
         if self.backend == "mongomock":
             import mongomock
