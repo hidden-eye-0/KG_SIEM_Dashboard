@@ -185,10 +185,13 @@ are excluded** (`ml/preprocessing/labels.py` lists every exclusion with its reas
 | Paired evaluation | `python scripts/run_evaluation.py --n 10` |
 | ATT&CK bundle (optional) | `python -m backend.services.mitre download` |
 | Headless UI check | `pip install playwright && python -m playwright install chromium && python scripts/ui_smoke.py` |
+| Live ingestion smoke | `python scripts/ingest_smoke.py` (API running) |
 
 API docs: `http://localhost:8000/docs`. Key endpoints: `/api/health`, `/api/alerts`, `POST /api/investigations`,
 `/api/investigations/{id}/stream` (SSE), `/api/graph/{id}`, `/api/graph/{id}/node?key=`,
 `/api/reports/{id}[/markdown|/pdf]`, `POST /api/evaluation/run`, `/api/evaluation/grounding/{id}`.
+
+The model-agnostic ingestion bridge is `POST /api/ingest`: it accepts up to 500 canonical post-inference events with `prediction` metadata. This intentionally keeps the final trained detector outside this repository until the final integration step; once integrated, the detector can call this endpoint without changing the investigation stack.
 
 ---
 
@@ -217,6 +220,7 @@ Demo-mode results are properties of the synthetic scenarios, not of CICIoT2023.
   reported as *overlapping*, weak links (no shared source/target) are flagged as unsupported.
 * Stages backed by fewer than three flows are marked *weak support* (possible misclassification).
 * `mongomock` and the NetworkX graph are process-local; evaluation jobs are in-process threads.
+* The live ingestion endpoint is a post-inference bridge. It does not perform ML inference by itself; final model integration supplies the prediction contract.
 * SHAP is computed on ≤300 rows per class to fit small machines; disable/raise in `profiles.py`.
 * Free-tier Neo4j Aura / Atlas latency will make investigations slower than the in-memory demo.
 

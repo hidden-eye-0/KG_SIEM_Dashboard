@@ -971,7 +971,7 @@ def validate_grounding(text: str, state: InvestigationState) -> dict:
     import re
 
     known_ev = {e["evidence_id"] for e in state.get("evidence", [])}
-    cited = set(re.findall(r"evd_[0-9A-Z]+", text))
+    cited = set(re.findall(r"\bevd_[A-Za-z0-9]+\b", text))
     unknown_ev = sorted(cited - known_ev)
     ips_in_text = set(re.findall(r"\b\d{1,3}(?:\.\d{1,3}){3}\b", text))
     known_ips = {v["value"] for v in state.get("entities", {}).values() if v["type"] == "IP"} | {state["alert"]["source_ip"]} | set(state["alert"].get("destination_ips", []))

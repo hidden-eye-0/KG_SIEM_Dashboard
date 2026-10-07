@@ -1,4 +1,4 @@
-.PHONY: install api ui build test pipeline inspect smoke eval mitre
+.PHONY: install api ui build test pipeline inspect smoke ingest-smoke eval mitre
 
 install:            ## python + node dependencies
 	pip install -r requirements.txt
@@ -24,6 +24,9 @@ inspect:            ## dataset inspection only (needs part-*.csv in DATASET_DIR)
 
 smoke:              ## one adaptive + one baseline investigation from the CLI
 	python scripts/smoke_investigation.py && python scripts/smoke_investigation.py --mode baseline
+
+ingest-smoke:        ## validate the post-inference live ingestion bridge against a running API
+	python scripts/ingest_smoke.py
 
 eval:               ## paired adaptive-vs-baseline comparison
 	python scripts/run_evaluation.py --n 10

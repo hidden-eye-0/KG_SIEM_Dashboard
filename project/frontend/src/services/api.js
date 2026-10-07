@@ -47,6 +47,8 @@ export const api = {
   alertEvents: (id, limit = 100) => http.get(`/alerts/${id}/events`, { params: { limit } }),
   setAlertStatus: (id, status) => http.post(`/alerts/${id}/status`, { status }),
 
+  ingest: (body) => http.post('/ingest', body),
+
   investigations: (params) => http.get('/investigations', { params }),
   createInvestigation: (body) => http.post('/investigations', body),
   investigation: (id, includeState = true) => http.get(`/investigations/${id}`, { params: { include_state: includeState } }),

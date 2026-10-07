@@ -349,7 +349,10 @@ def get_graph_store() -> GraphStore:
                 _graph = Neo4jGraphStore(s.neo4j_uri, s.neo4j_username, s.neo4j_password)
                 log.info("Connected to Neo4j at %s", s.neo4j_uri)
             except Exception as exc:
-                log.error("Neo4j unreachable (%s); using in-memory graph store", exc)
+                log.error("Neo4j unreachable (%s)", exc)
+                if not s.allow_service_fallback:
+                    raise RuntimeError("Neo4j is configured but unreachable and ALLOW_SERVICE_FALLBACK=false") from exc
+                log.warning("Falling back to in-memory NetworkX because ALLOW_SERVICE_FALLBACK=true")
                 _graph = InMemoryGraphStore()
         else:
             log.warning("NEO4J_URI not set — using in-memory NetworkX graph store")

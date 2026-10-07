@@ -10,7 +10,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -69,6 +69,21 @@ class Settings(BaseSettings):
     auth_required: bool = Field(default=False, alias="AUTH_REQUIRED")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
     auto_seed_demo: bool = Field(default=True, alias="AUTO_SEED_DEMO")
+    allow_service_fallback: bool = Field(default=True, alias="ALLOW_SERVICE_FALLBACK")
+
+    @model_validator(mode="after")
+    def validate_production_security(self) -> "Settings":
+        """Fail closed when production-style JWT auth is enabled with demo secrets."""
+        if self.auth_required:
+            if self.jwt_secret in {"change-me", "change-me-in-production", ""}:
+                raise ValueError("AUTH_REQUIRED=true requires a non-default JWT_SECRET")
+            if self.demo_analyst_password in {"change-me", "analyst", ""}:
+                raise ValueError("AUTH_REQUIRED=true requires a non-default DEMO_ANALYST_PASSWORD")
+        if self.jwt_expire_minutes < 5 or self.jwt_expire_minutes > 7 * 24 * 60:
+            raise ValueError("JWT_EXPIRE_MINUTES must be between 5 minutes and 7 days")
+        if not 0.0 <= self.sufficiency_threshold <= 1.0:
+            raise ValueError("SUFFICIENCY_THRESHOLD must be between 0 and 1")
+        return self
 
     # ---- derived helpers -------------------------------------------------
     @property
@@ -119,6 +134,7 @@ class Settings(BaseSettings):
             "artifacts_dir": str(self.artifacts_dir),
             "random_seed": self.random_seed,
             "auth_required": self.auth_required,
+            "allow_service_fallback": self.allow_service_fallback,
         }
 
 

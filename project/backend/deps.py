@@ -75,7 +75,9 @@ def current_user(request: Request, creds: Optional[HTTPAuthorizationCredentials]
         if creds:
             try:
                 payload = jwt.decode(creds.credentials, c.settings.jwt_secret, algorithms=["HS256"])
-                return {"username": payload.get("sub"), "role": payload.get("role", "analyst")}
+                username = payload.get("sub")
+                if username:
+                    return {"username": username, "role": "analyst"}
             except JWTError:
                 pass
         return {"username": c.settings.demo_analyst_username, "role": "analyst", "anonymous": True}
@@ -83,6 +85,9 @@ def current_user(request: Request, creds: Optional[HTTPAuthorizationCredentials]
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "authentication required")
     try:
         payload = jwt.decode(creds.credentials, c.settings.jwt_secret, algorithms=["HS256"])
-    except JWTError as exc:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, f"invalid token: {exc}")
-    return {"username": payload.get("sub"), "role": payload.get("role", "analyst")}
+    except JWTError:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "invalid or expired token")
+    username = payload.get("sub")
+    if not username or payload.get("role") != "analyst":
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "invalid token claims")
+    return {"username": username, "role": "analyst"}

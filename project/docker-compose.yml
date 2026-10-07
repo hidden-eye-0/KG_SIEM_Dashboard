@@ -15,8 +15,10 @@ services:
     environment:
       # Only applied when the local-db profile is used; harmless otherwise because
       # the values in .env take precedence when set there.
-      MONGODB_URI: ${MONGODB_URI:-}
-      NEO4J_URI: ${NEO4J_URI:-}
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017}
+      NEO4J_URI: ${NEO4J_URI:-bolt://neo4j:7687}
+      NEO4J_USERNAME: ${NEO4J_USERNAME:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-changeme-please}
     ports: ["8000:8000"]
     volumes:
       - ./data:/app/data            # DATASET placeholder lives here (data/raw)
