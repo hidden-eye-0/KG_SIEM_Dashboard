@@ -23,7 +23,7 @@ from fastapi.staticfiles import StaticFiles
 
 from backend.config import get_settings
 from backend.deps import build_container, get_container
-from backend.routes import data, investigations, system
+from backend.routes import data, ingest, investigations, system
 from backend.utils.logging import setup_logging
 
 log = logging.getLogger("api")
@@ -65,18 +65,19 @@ app = FastAPI(title="Adaptive Knowledge-Graph SIEM Investigation Framework", ver
               description="Research prototype: ML detection → alerts → LangGraph adaptive investigation → knowledge graph → evidence-backed attack story.")
 
 _settings = get_settings()
-app.add_middleware(CORSMiddleware, allow_origins=_settings.cors_origins(), allow_origin_regex=r"https?://.*", allow_credentials=True,
+app.add_middleware(CORSMiddleware, allow_origins=_settings.cors_origins(), allow_credentials=True,
                    allow_methods=["*"], allow_headers=["*"])
 
 app.include_router(system.router, prefix="/api", tags=["system"])
 app.include_router(data.router, prefix="/api", tags=["data"])
+app.include_router(ingest.router, prefix="/api", tags=["ingestion"])
 app.include_router(investigations.router, prefix="/api", tags=["investigations"])
 
 
 @app.exception_handler(Exception)
 async def unhandled(request: Request, exc: Exception):
     log.exception("unhandled error on %s", request.url.path)
-    return JSONResponse(status_code=500, content={"detail": f"{type(exc).__name__}: {exc}"})
+    return JSONResponse(status_code=500, content={"detail": "Internal server error. Check backend logs for details."})
 
 
 @app.get("/api")
