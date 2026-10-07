@@ -64,6 +64,8 @@ def start_investigation(inv_id: str, c: Container = Depends(get_container), user
         doc = c.runner.start(inv_id)
     except KeyError:
         raise HTTPException(404, "investigation not found")
+    except RuntimeError as exc:
+        raise HTTPException(409, str(exc))
     return jsonable({k: v for k, v in doc.items() if k not in ("state", "steps")})
 
 
