@@ -1,36 +1,55 @@
-# Build status — full system (2026-09-05)
+# Build status — current system (2026-10-07)
 
-| Phase (md §31) | Component | Status | Verified by |
-|---|---|---|---|
-| 1 | Dataset inspection (`ml/preprocessing/inspect.py`) | done, waiting for real files in `data/raw/` | 20 unit tests |
-| 2–3 | Cleaning, capped stratified subset (`clean.py`, `subset.py`) | done; runs automatically in dataset mode | contract tests (demo path) |
-| 4 | RF + XGBoost training, 70/15/15, class weights, model card | done | `models` collection, ML page |
-| 5 | Importance comparison (RF impurity / permutation / XGB gain / SHAP), profiles, feature-reduction experiment | done | ML page, `behavior_profiles` |
-| 6 | Scenario contextualiser + ingestion + alerting | done | events/alerts collections |
-| 7 | Evidence repository + 18 tools with uniform result contract, ground truth stripped | done | `test_tool_layer_strips_ground_truth` |
-| 8 | LangGraph state, requirements table, policy, 11 nodes | done | adaptive + baseline runs |
-| 9 | Knowledge graph (NetworkX / Neo4j), rules R1–R7 | done | `test_every_graph_element_is_traceable` |
-| 10 | Threat intel (VT/OTX passive, gated, cached) + MITRE | done (providers optional) | `test_threat_intel_never_queries_private_or_documentation_ips` |
-| 11 | Attack reconstruction (stages, links, overlaps, distributed sources, gaps) | done | chain tab, claims |
-| 12 | Gemini narrative + grounding validation + template fallback | done (Gemini optional) | `test_grounding_validator_rejects_invented_ids_and_ips` |
-| 13 | 15-section report, claims → evidence ids, Markdown/PDF | done | `test_markdown_and_pdf_rendering`, `/api/reports/...` |
-| 14 | FastAPI API, SSE stream, JWT (optional) | done | `test_api_surface`, curl smoke |
-| 15 | React dashboard, 11 pages, Cytoscape graph with evidence inspector | done | `scripts/ui_smoke.py` — 16 routes, 0 console errors |
-| 16 | Evaluation harness (adaptive vs fixed baseline + grounding metrics) | done | Evaluation page, `scripts/run_evaluation.py` |
-| 17 | Docker Compose / Dockerfile / Makefile / README | done (Docker optional) | — |
-| 18 | Tests | 33 passing (`python -m pytest tests/unit -q`) | — |
+| Area | Status | Current evidence |
+|---|---|---|
+| Dataset inspection | ✅ Working | Real uploaded CICIoT2023-derived CSV inspected locally |
+| Demo/sample ML pipeline | ✅ Working | Small sample dataset used for SIEM integration testing; final trained model will be integrated later |
+| Event generation | ✅ Working | 4,590 events generated in current dataset-mode seed |
+| Alert generation | ✅ Working | 65 alerts generated |
+| Investigation runtime | ✅ Implemented | FastAPI create/start/stop/stream/evidence/report endpoints + LangGraph runner |
+| Adaptive investigation | ✅ Implemented | State-dependent policy, evidence-gap loop and safeguards |
+| Baseline investigation | ✅ Implemented | Fixed-policy comparison path |
+| Knowledge graph | ✅ Implemented | NetworkX fallback + Neo4j integration path, evidence-linked nodes/edges |
+| Threat intelligence | ✅ Implemented | Passive VT/OTX paths, gated and cached; providers optional |
+| MITRE ATT&CK | ⚠️ Partial configuration | Curated mapping available; full STIX bundle not loaded in current environment |
+| Gemini | ⚠️ Optional | Backend fallback works; current environment reports GEMINI_API_KEY not set |
+| Reports | ✅ Implemented | 15-section report model + Markdown/PDF endpoints |
+| Evaluation | ✅ Implemented | Adaptive-vs-baseline comparison harness and grounding metrics |
+| React SOC dashboard | ✅ Implemented | Alerts, investigations, graph, attack story, TI, events, models, evaluation, settings |
+| Authentication | ✅ Implemented | JWT path exists; production deployment should enable AUTH_REQUIRED |
+| Persistence | ⚠️ Development fallback | Current run uses mongomock + NetworkX; persistent MongoDB/Neo4j remain deployment configuration |
+| Live ingestion | ⚠️ Not finalised | Dataset seeding is working; live external-event ingestion is still a final integration task |
+| Final trained model | ⏳ Intentionally deferred | Will be integrated from the separate model repository at the end |
 
-## Last verified numbers (DEMO MODE — synthetic flows, NOT dataset statistics)
+## Current development run
 
-* 15,000 synthetic flows (600/class × 23 + benign weighting) → 4,590 events → 75 alerts → 15 multi-stage scenarios.
-* XGBoost test macro-F1 0.925, RandomForest 0.928 on synthetic data (primary = xgboost by the selection rule).
-* Paired evaluation, 4 alerts: adaptive 5.0 steps / 314 events / evidence recall 0.867 vs baseline 3.0 / 178 / 0.732;
-  chain stage recall 1.0 both; 100 % of claims carry evidence ids; 0 unknown ids/IPs per narrative.
+The current SIEM run is intentionally **not the final ML model**. The small CICIoT2023-derived sample is being used to exercise the end-to-end product workflow while the production-quality trained model remains in a separate repository.
 
-## Open items / known limitations
+Latest reported runtime state:
 
-* Real CICIoT2023 files not yet present — dataset-specific claims are impossible until `python -m ml.pipeline inspect` runs on them.
-* Gemini / VT / OTX / Atlas / Aura are not configured in this sandbox; the code paths exist and degrade gracefully but the LLM policy and TI enrichment were not exercised end-to-end here.
-* Weak stages (< 3 flows) and overlapping stages are reported as such rather than hidden.
-* `ml/pipeline.py` holds the ingestion event list in RAM (fine for the capped subset; stream in batches for larger caps).
-* Evaluation jobs and the mongomock store are process-local.
+- pipeline mode: `dataset`
+- data source: `CICIoT2023`
+- primary model in this development run: `xgboost`
+- model version: `20261007T010231Z`
+- test Macro-F1: `0.7477459096`
+- events: `4590`
+- alerts: `65`
+- scenarios: `15`
+- behavior profiles: `24`
+
+**Interpretation:** these metrics are development/sample-run results and must not be presented as the final trained-model performance.
+
+## Remaining completion work
+
+The remaining work is primarily validation, deployment hardening and product integration rather than rebuilding the already-implemented investigation stack:
+
+1. Exercise at least one real alert through adaptive investigation end-to-end.
+2. Verify graph/evidence traceability from alert → evidence → graph → chain → report.
+3. Run paired adaptive-vs-baseline evaluation and store a reproducible result.
+4. Validate MITRE bundle loading and mapping.
+5. Configure Gemini/TI providers for the final demo where credentials are available.
+6. Validate persistent MongoDB + Neo4j deployment.
+7. Enable and test authentication for production/demo deployment.
+8. Add/validate controlled live ingestion if required by the final demonstration.
+9. Run backend tests, frontend build and UI smoke after final changes.
+10. Integrate the separate final trained model last and run a complete regression pass.
