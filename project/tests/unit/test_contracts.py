@@ -253,3 +253,60 @@ def test_api_surface(container, adaptive):
         assert client.get("/api/mitre/techniques").json()["mappings"]
         r = client.post("/api/investigations", json={"alert_id": adaptive["alert_id"], "mode": "baseline", "autostart": False})
         assert r.status_code == 201 and r.json()["policy"] == "fixed"
+
+        ingest = client.post(
+            "/api/ingest",
+            json={
+                "model_version": "integration-test",
+                "source": "contract-test",
+                "events": [
+                    {
+                        "timestamp": "2026-10-07T01:00:00Z",
+                        "source_ip": "203.0.113.44",
+                        "destination_ip": "192.0.2.44",
+                        "device_id": "device-contract-01",
+                        "device_type": "iot",
+                        "protocol": "ICMP",
+                        "log_source": "contract-test",
+                        "features": {"Rate": 50.0, "ICMP": 1.0},
+                        "prediction": {
+                            "label": "DDoS-ICMP_Flood",
+                            "attack_type": "DDoS ICMP Flood",
+                            "category": "DDoS",
+                            "confidence": 0.99,
+                            "model": "integration-test",
+                        },
+                    }
+                ],
+            },
+        )
+        assert ingest.status_code == 202, ingest.text
+        body = ingest.json()
+        assert body["status"] == "accepted"
+        assert body["events_ingested"] == 1
+        assert body["alerts_created"] == 1
+        assert body["provenance"] == "ingested"
+
+        live = client.get("/api/events", params={"source_ip": "203.0.113.44", "page_size": 5}).json()
+        assert live["items"] and "ground_truth" not in json.dumps(live["items"])
+        assert live["items"][0]["context"]["provenance"] == "ingested"
+
+        bad = client.post(
+            "/api/ingest",
+            json={
+                "model_version": "integration-test",
+                "events": [{
+                    "timestamp": "2026-10-07T01:00:00Z",
+                    "source_ip": "203.0.113.45",
+                    "destination_ip": "192.0.2.45",
+                    "prediction": {
+                        "label": "DDoS-ICMP_Flood",
+                        "attack_type": "DDoS ICMP Flood",
+                        "category": "DDoS",
+                        "confidence": 0.99,
+                    },
+                    "ground_truth": {"label": "should-never-be-accepted"},
+                }],
+            },
+        )
+        assert bad.status_code == 422
