@@ -114,6 +114,11 @@ class InvestigationRunner:
             raise KeyError(inv_id)
         if doc["status"] == "running":
             return doc
+        if doc["status"] in ("completed", "failed", "stopped"):
+            raise RuntimeError(f"investigation {inv_id} is already {doc['status']}; create a new investigation to rerun")
+        existing = self._threads.get(inv_id)
+        if existing and existing.is_alive():
+            return doc
         stop_flag = threading.Event()
         self._stop_flags[inv_id] = stop_flag
         t = threading.Thread(target=self._run, args=(inv_id, stop_flag), name=f"inv-{inv_id}", daemon=True)
