@@ -69,6 +69,7 @@ class Settings(BaseSettings):
     auth_required: bool = Field(default=False, alias="AUTH_REQUIRED")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
     auto_seed_demo: bool = Field(default=True, alias="AUTO_SEED_DEMO")
+    allow_service_fallback: bool = Field(default=True, alias="ALLOW_SERVICE_FALLBACK")
 
     @model_validator(mode="after")
     def validate_production_security(self) -> "Settings":
@@ -133,6 +134,7 @@ class Settings(BaseSettings):
             "artifacts_dir": str(self.artifacts_dir),
             "random_seed": self.random_seed,
             "auth_required": self.auth_required,
+            "allow_service_fallback": self.allow_service_fallback,
         }
 
 
